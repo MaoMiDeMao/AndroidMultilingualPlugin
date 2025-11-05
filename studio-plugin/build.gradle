@@ -1,0 +1,118 @@
+plugins {
+    id 'org.jetbrains.intellij' version '1.17.3'
+    id 'java'
+}
+
+group = 'io.github.miao'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+    google()
+    maven { url = uri('https://repo.gradle.org/gradle/libs-releases') }
+}
+
+intellij {
+   
+    version = '2023.2.6'
+    type = 'IC'
+    downloadSources = false
+    updateSinceUntilBuild = false
+
+    // 将沙盒目录放到可写位置，避免 /Applications 写入权限问题（需要 String 而非 File）
+    sandboxDir = "${buildDir}/idea-sandbox"
+}
+
+tasks.named('test') {
+    enabled = false
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// Gradle 插件代码已恢复到 buildSrc，studio-plugin 不再需要注册插件
+
+tasks {
+    patchPluginXml {
+        sinceBuild.set('213')  // 降低最低版本要求，兼容更多 IDE 版本
+        changeNotes.set('实现多语言xml文件导出到excel，支持编辑后在此导会到多语言xml中')
+    }
+}
+
+// 强制重建索引并开启内部/调试标志，缓解沙盒索引 NPE
+// 同时禁用 Android SDK 设备管理器初始化，避免 schema 版本不兼容错误
+// 配置类加载器委托策略，确保 SLF4J 由 IDE 的类加载器提供
+runIde {
+    jvmArgs(
+            '-Didea.indexes.forceRebuild=true',
+            '-Didea.is.internal=true',
+            '-Didea.debug.mode=true',
+            '-Didea.auto.reload.plugins=false',
+            '-Didea.check.update=false',
+            '-Dide.no.platform.update=true',
+            // 禁用 Android SDK/AVD 管理器初始化，避免设备 schema 版本不兼容
+            '-Dandroid.sdk.path=',
+            '-Dandroid.home=',
+            '-DANDROID_SDK_HOME=',
+            '-DANDROID_AVD_HOME=',
+            // 禁用设备管理器扫描，避免 Unexpected schema version 8 错误
+            '-Didea.android.sdk.disabled=true',
+            '-Dcom.android.tools.idea.sdk.disabled=true',
+            '-Dandroid.sdk.disabled=true',
+            // 禁用 AVD 管理器相关功能
+            '-Dandroid.tools.avdmanager.disabled=true',
+            '-Dcom.android.tools.idea.avdmanager.disabled=true',
+            '-Didea.avdmanager.disabled=true',
+            // 禁用设备管理器
+            '-Dcom.android.tools.idea.device.disabled=true',
+            '-Didea.device.disabled=true',
+            // 禁用设备架构解析
+            '-Dcom.android.dvlib.DeviceSchema.disabled=true',
+            // 禁用 AVD 列表扫描
+            '-Dcom.android.sdklib.internal.avd.AvdManager.disabled=true',
+            // 禁用 SLF4J 的静态绑定查找，强制使用 IDE 提供的实现
+            '-Dslf4j.detectLoggerNameMismatch=false'
+    )
+}
+
+dependencies {
+    // Gradle Tooling API for executing Gradle tasks
+    // 排除所有 SLF4J 相关依赖，避免与 IntelliJ Platform 的类加载器冲突
+    // IDE 会提供 SLF4J 实现，不需要从 Gradle Tooling API 中加载
+    implementation('org.gradle:gradle-tooling-api:7.6.4') {
+        exclude group: 'org.slf4j'
+        exclude group: 'ch.qos.logback'
+        // 排除所有传递依赖中的 SLF4J
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'org.slf4j', module: 'slf4j-simple'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+    }
+    // JetBrains annotations used by IntelliJ APIs
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    
+    // Gradle Plugin dependencies (shared with buildSrc)
+    // 将 Gradle 插件类打包到 IntelliJ 插件中，供用户项目使用
+    // Apache POI for Excel file processing
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    // Gradle API for plugin development
+    compileOnly gradleApi()
+    compileOnly localGroovy()
+}
+
+// 确保 Gradle 插件类被打包到插件 JAR 中
+jar {
+    // 包含所有依赖类（Gradle 插件代码）
+    archiveBaseName = 'multilingual-studio-plugin'
+}
+
+// 配置插件 ZIP 文件名
+tasks.named('buildPlugin') {
+    archiveBaseName.set('studio-plugin-language')
+}
+
+

@@ -1,0 +1,17 @@
+// 根项目构建脚本
+// 自动为所有 Android 应用和库模块应用多语言插件，无需在每个 build.gradle 中手动配置
+
+// 将根项目的 buildDir 设置为临时目录，避免在项目根目录生成 build 文件夹
+buildDir = file("${projectDir}/.gradle/build")
+
+allprojects {
+    afterEvaluate { project ->
+        // 自动检测 Android 项目并应用插件
+        if ((project.plugins.hasPlugin("com.android.application") || 
+             project.plugins.hasPlugin("com.android.library")) &&
+            !project.plugins.hasPlugin("io.github.miao.multilingual")) {
+                project.plugins.apply("io.github.miao.multilingual")
+        }
+    }
+}
+

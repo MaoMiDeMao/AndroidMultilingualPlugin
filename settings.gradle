@@ -1,0 +1,33 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.PREFER_PROJECT
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = "MultilingualPlugin"
+include(":app")
+include(":library")
+
+// 从 gradle.properties 读取配置，如果无法下载 IntelliJ 依赖导致 IDE 同步失败，
+// 可以在 gradle.properties 中设置 studio.plugin.enabled=false 来暂时排除 studio-plugin 模块
+def includeStudioPlugin = providers.gradleProperty("studio.plugin.enabled").orElse("true").get().toBoolean()
+if (includeStudioPlugin) {
+    include(":studio-plugin")
+}
+

@@ -1,0 +1,76 @@
+<idea-plugin>
+  <id>io.github.miao.multilingual.studio</id>
+  <name>多语言助手</name>
+  <version>0.1.0</version>
+  <vendor email="miaomidemiao@outlook.com" url="https://github.com/MaoMiDeMao/AndroidMultilingualPlugin">miao</vendor>
+  
+  <description>
+  <![CDATA[
+    <h2>多语言翻译管理工具</h2>
+    <p>支持从 Android 字符串资源生成 Excel 文件，以及从 Excel 文件生成翻译后的 strings.xml 文件。</p>
+    
+    <h3>功能特性</h3>
+    <ul>
+      <li><b>导出到 Excel</b>：将 Android 项目的 strings.xml 文件导出为 Excel 文件</li>
+      <li><b>从 Excel 生成翻译文件</b>：支持两种导入模式，自动生成各语言的 strings.xml 文件</li>
+      <li><b>自动插件管理</b>：首次使用时自动创建插件代码到 buildSrc 目录</li>
+    </ul>
+    
+    <h3>使用方法</h3>
+    
+    <h4>1. 菜单入口</h4>
+    <p>点击菜单栏 <code>Tools</code> -> <code>多语言助手</code> 即可看到功能菜单：</p>
+    <img src="images/menu.png" alt="菜单入口" width="600"/>
+    
+    <h4>2. 导出到 Excel</h4>
+    <p>选择 <code>导出到excel</code> 打开配置对话框：</p>
+    <img src="images/generate-excel-dialog.png" alt="生成 Excel 配置对话框" width="600"/>
+    <p>配置参数后点击 OK 即可导出 Excel 文件。</p>
+    
+    <h4>3. 从 Excel 生成翻译文件</h4>
+    <p>选择 <code>生成xml文件</code> 打开配置对话框：</p>
+    <img src="images/generate-translations-dialog.png" alt="生成翻译文件配置对话框" width="600"/>
+    <p>支持两种导入模式：</p>
+    <ul>
+      <li><b>指定语言比对导入</b>：根据基准语言的文本内容匹配 key，仅更新匹配到的翻译</li>
+      <li><b>首列 key 对比导入</b>：根据 Excel 首列的 key 进行匹配导入</li>
+    </ul>
+    
+    <h3>更多信息</h3>
+    <p>详细使用说明请查看插件项目地址：<a href="https://github.com/MaoMiDeMao/AndroidMultilingualPlugin">GitHub</a></p>
+  ]]>
+  </description>
+
+  <change-notes><![CDATA[
+    0.1.0 初始版本：在 Android Studio 中运行 :app:generateExcel 和 :app:generateTranslations 任务。
+
+  ]]></change-notes>
+
+  <idea-version since-build="213"/>
+
+  <depends>com.intellij.modules.platform</depends>
+
+  <extensions>
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <!-- Group actions under "Multilingual" submenu in Tools menu -->
+    <group id="MultilingualActions" text="多语言助手" popup="true" description="多语言翻译工具">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <action 
+          id="io.github.miao.studio.GenerateExcelAction" 
+          class="io.github.miao.studio.GenerateExcelAction" 
+          text="导出到excel"
+          description="运行 :app:generateExcel 任务，将翻译导出到 Excel 文件">
+      </action>
+      <action 
+          id="io.github.miao.studio.GenerateTranslationsAction" 
+          class="io.github.miao.studio.GenerateTranslationsAction" 
+          text="生成xml文件"
+          description="运行 :app:generateTranslations 任务，从 Excel 文件生成 strings.xml">
+      </action>
+    </group>
+  </actions>
+</idea-plugin>
+

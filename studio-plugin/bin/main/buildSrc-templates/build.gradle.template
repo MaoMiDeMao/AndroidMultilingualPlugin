@@ -1,0 +1,24 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+// 插件注册（与 studio-plugin 中的注册保持一致）
+gradlePlugin {
+    plugins {
+        register('multilingualPlugin') {
+            id = 'io.github.miao.multilingual'
+            implementationClass = 'io.github.miao.MultilingualPlugin'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+}
